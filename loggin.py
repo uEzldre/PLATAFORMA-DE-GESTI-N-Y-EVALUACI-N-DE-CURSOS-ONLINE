@@ -167,6 +167,142 @@ def accion_crear_evaluacion(sistema: Plataforma):
         print("Evaluación creada (sin ID)")
     except Exception as e:
         print("Error:", e)
+# parte de pablo
+
+def accion_registrar_nota(sistema: Plataforma):
+    if not sistema.cursos:
+        print("Primero crea cursos"); return
+    cursos = list(sistema.cursos.items())
+    print("\n-- CURSOS --")
+    for i, (cod, info) in enumerate(cursos, 1):
+        print(f"{i}) {cod} | {info['nombre']}")
+    try:
+        pos_c = int(input("Número de curso: ").strip()) - 1
+    except:
+        print("Selección inválida"); return
+    if pos_c < 0 or pos_c >= len(cursos):
+        print("Selección inválida"); return
+    cod = cursos[pos_c][0]
+
+    evals = sistema.cursos[cod]["evaluaciones"]
+    if not evals:
+        print("No hay evaluaciones"); return
+    print("\n-- EVALUACIONES --")
+    for i, ev in enumerate(evals, 1):
+        print(f"{i}) {ev['titulo']} | {ev['ponderacion']}")
+    try:
+        pos_ev = int(input("Número de evaluación: ").strip()) - 1
+    except:
+        print("Selección inválida"); return
+    if pos_ev < 0 or pos_ev >= len(evals):
+        print("Selección inválida"); return
+
+    inscritos = sistema.cursos[cod]["inscritos"]
+    if not inscritos:
+        print("No hay inscritos"); return
+    print("\n-- INSCRITOS --")
+    for i, uid in enumerate(inscritos, 1):
+        print(f"{i}) {sistema.usuarios[uid].nombre} ({uid})")
+    try:
+        pos_s = int(input("Número de estudiante: ").strip()) - 1
+    except:
+        print("Selección inválida"); return
+    if pos_s < 0 or pos_s >= len(inscritos):
+        print("Selección inválida"); return
+
+    uid_est = inscritos[pos_s]
+    nota = input("Nota (0..100): ").strip()
+    try:
+        sistema.registrar_nota(cod, pos_ev, uid_est, nota)
+        print("Nota registrada")
+    except Exception as e:
+        print("Error:", e)
+
+def accion_listar_cursos(sistema: Plataforma):
+    if not sistema.cursos:
+        print("Sin cursos"); return
+    for cod, info in sistema.cursos.items():
+        print(f"{cod} | {info['nombre']} | inst={info['instructor']}")
+
+def accion_ver_inscritos(sistema: Plataforma):
+    if not sistema.cursos:
+        print("Sin cursos"); return
+    for cod, info in sistema.cursos.items():
+        print(f"\nCurso {cod}:")
+        if not info["inscritos"]:
+            print("- Sin inscritos")
+        else:
+            for uid in info["inscritos"]:
+                print(f"- {uid} | {sistema.usuarios[uid].nombre}")
+
+def accion_ver_evaluaciones(sistema: Plataforma):
+    if not sistema.cursos:
+        print("Sin cursos"); return
+    for cod, info in sistema.cursos.items():
+        print(f"\nCurso {cod}:")
+        if not info["evaluaciones"]:
+            print("- Sin evaluaciones")
+        else:
+            for i, ev in enumerate(info["evaluaciones"], 1):
+                print(f"{i}) {ev['titulo']} | {ev['ponderacion']}")
+
+def accion_ver_calificaciones(sistema: Plataforma):
+    if not sistema.cursos:
+        print("Sin cursos"); return
+    for cod, info in sistema.cursos.items():
+        print(f"\nCurso {cod}:")
+        if not info["evaluaciones"]:
+            print("- Sin evaluaciones"); continue
+        for i, ev in enumerate(info["evaluaciones"], 1):
+            print(f"Evaluación {i}:")
+            if not ev["calificaciones"]:
+                print("  Sin calificaciones")
+            else:
+                for uid, n in ev["calificaciones"].items():
+                    print(f"  {uid} {sistema.usuarios[uid].nombre}: {n}")
+
+
+class PlataformaP(Plataforma):
+    pass
+
+# menú (solo invoca funciones ya definidas)
+def menu():
+    sistema = Plataforma()
+    acciones = {
+        "1": lambda: accion_registrar_instructor(sistema),
+        "2": lambda: accion_registrar_estudiante(sistema),
+        "3": lambda: accion_crear_curso(sistema),
+        "4": lambda: accion_inscribir_estudiante(sistema),
+        "5": lambda: accion_crear_evaluacion(sistema),
+        "6": lambda: accion_registrar_nota(sistema),
+        "7": lambda: accion_listar_cursos(sistema),
+        "8": lambda: accion_ver_inscritos(sistema),
+        "9": lambda: accion_ver_evaluaciones(sistema),
+        "10": lambda: accion_ver_calificaciones(sistema),
+    }
+    while True:
+        print("\n=== MENU ===")
+        print("1) Registrar instructor")
+        print("2) Registrar estudiante")
+        print("3) Crear curso")
+        print("4) Inscribir estudiante")
+        print("5) Crear evaluación (sin ID)")
+        print("6) Registrar nota")
+        print("7) Listar cursos")
+        print("8) Ver inscritos")
+        print("9) Ver evaluaciones")
+        print("10) Ver calificaciones")
+        print("11) Salir")
+        op = input("Opción:\n").strip()
+        if op == "11":
+            break
+        accion = acciones.get(op)
+        if accion: 
+            accion()
+        else:
+            print("Opción inválida")
+
+menu()
 
 # parte de pablo
 
